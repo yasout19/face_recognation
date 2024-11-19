@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+      <meta charset="UTF-8">
+      <title>verification</title>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="/css/style_2.css">
+    
+    </head>
+    <body>
+    <!-- partial:index.partial.html -->
+    <!-- JQUERY and Normalize.css INSTALLED -->
+    
+    <div class="overlay" id="loader" style="display: block;">
+        <div class="overlayDoor"></div>
+        <div class="overlayContent">
+            <div class="loader">
+                <div class="inner"></div>
+            </div>
+            
+        </div>
+    </div>
+    
+    
+    
+    
+    
+    
+    <!-- DON'T NEED THIS PART -->
+    <div class="header">
+        <div class="darken">   </div>
+    </div>
+    
+    <!-- <img src="/image/check.png" class="blinking-image" alt="Desktop PC Hacker Security" style="width: 75px; float:left;margin-left:7px;margin-right:0px"> -->
+    <img src="/image/x-button.png" id="check" class="blinking-image" alt="Desktop PC Hacker Security" style="width: 75px; float:left;margin-left:7px;margin-right:0px">
+    
+    
+    <!-- <div class="image-container" style="  box-shadow: 1px 4px 4px rgb(47, 229, 101);"> -->
+    <div class="image-container" id="image-container" style="  box-shadow: 1px 8px 8px rgb(255, 0, 0); display: none;">
+    
+    
+        <img src="/image/desktop-pc-hacker-security.jpg" alt="Desktop PC Hacker Security" id="person" style="display: none;">
+      </div>
+       <div class="info-container" id="info" style="display: none;"> 
+         <h4 class='deepshadow' id="nom"></h4>
+        <ul class="details">
+          <li ><strong> Gendre : </strong><div id="nom2"></div></li>
+          <li ><strong>Profession : </strong> <div id="metier"></div></li>
+          <li ><strong>Age : </strong> <div id="age"></div></li> 
+        
+        </ul> </div>
+        <div>
+        <h4 class='deepshadow' style="color: red;" id="verifier"> </h4>
+      </div>
+    <!-- <div class="result-container">
+        <h2>Résultat de l'envoi</h2>
+        <div id="messageDisplay"></div>
+    </div> -->
+    <!-- <script  src="/js/script_2.js"></script> -->
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+        <script th:inline="javascript">
+                /*<![CDATA[*/
+        // Parse the Thymeleaf variable to JSON
+        var message = /*[[${message}]]*/ '{}';
+        message = JSON.parse(message);
+
+        // Assuming message.features contains the features array string
+        var featuresString = message.features;
+        
+        // Remove the outer square brackets if any
+        if (featuresString.startsWith('[[') && featuresString.endsWith(']]')) {
+            featuresString = featuresString.slice(1, -1);
+        }
+
+        // Parse the cleaned features string into an array
+        var featuresArray = JSON.parse(featuresString);
+        console.log(featuresArray)
+        const verifier = document.getElementById('verifier');
+        // const featuresElement = document.getElementById('messageDisplay');
+                    
+        const image_container = document.getElementById('image-container');
+        const check = document.getElementById('check');
+        const nom = document.getElementById('nom');
+        const nom2 = document.getElementById('nom2');
+        const age = document.getElementById('age');
+        const metier = document.getElementById('metier');
+        const person = document.getElementById('person');
+        const info = document.getElementById('info');
+        const loader = document.getElementById('loader');
+        function cosineSimilarity(arr1, arr2) {
+            if (arr1.length !== arr2.length) return false;
+            
+            let dotProduct = 0;
+            let normA = 0;
+            let normB = 0;
+            for (let i = 0; i < arr1.length; i++) {
+                dotProduct += arr1[i] * arr2[i];
+                normA += arr1[i] * arr1[i];
+                normB += arr2[i] * arr2[i];
+            }
+            if (normA === 0 || normB === 0) return false; // to avoid division by zero
+
+            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        function isMatch(arr1, arr2, threshold = 0.73) {
+            const similarity = cosineSimilarity(arr1, arr2);
+            console.log("similarity:"+similarity)
+            return similarity >= threshold;
+        }
+
+        
+
+                        // Extract features array
+        function loadCSVAndCompare() {
+                    Papa.parse("/hashed_features1.csv", {
+                        download: true,
+                        header: false,
+                        complete: function(results) {
+                            let matchingRows = [];
+                            let i = 0;
+                            let matchFound = results.data.some((row, i) => {
+                                if (row.length > 4) {
+                                    let csvFeatures = row[4]; // Assuming JSON string is in the 5th column (index 4)
+                                    try {
+                                        let csvFeaturesArray = JSON.parse(csvFeatures);
+                                        console.log(csvFeaturesArray);
+                                        console.log(i); // Log current iteration count
+                                        if (isMatch(featuresArray[0], csvFeaturesArray)) {
+                                            matchingRows.push(row);
+                                            return true; // Exit loop
+                                        }
+                                    } catch (error) {
+                                        console.error(`Error parsing JSON in row ${i}:`, error);
+                                    }
+                                } else {
+                                    console.warn(`Row ${i} does not have enough columns:`, row);
+                                }
+                                return false; // Continue loop
+                            });
+                            if (!matchFound) {
+                                
+                                console.log('No matching rows found.');
+                                verifier.textContent = `personne non verifier`
+                            }
+                            console.log(`Total rows processed: ${results.data.length}`); // Log total rows processed
+                            displayResult(matchingRows);
+                        },
+                        error: function(error) {
+                            console.error('Error parsing CSV file:', error);
+                        }
+                    });
+                }
+
+                // Function to display the result
+        function displayResult(matchingRows) {
+                    if (matchingRows.length > 0) {
+                        // featuresElement.textContent = `Matching row found: ${JSON.stringify(matchingRows[0].slice(0, 4))}`;
+                        verifier.style.color = 'green';
+                        image_container.style.display = 'block';
+                        image_container.style.boxShadow = '1px 8px 8px rgb(0, 255, 0)'; 
+                        verifier.textContent = `verified`;
+                        check.src="/image/check.png";
+                        person.style.display='block'
+                        person.src="image/"+ JSON.stringify(matchingRows[0][0]).replace(/"/g, '')
+                        console.log(JSON.stringify(matchingRows[0][0]))
+                        nom.textContent=matchingRows[0][1]
+                        nom2.textContent=matchingRows[0][5]
+                        metier.textContent=matchingRows[0][3]
+                        age.textContent=matchingRows[0][2]
+                        info.style.display='block'
+                        loader.style.display='none'
+                        
+
+                        
+                    } else {
+                       
+                        verifier.textContent = `personne non verifier`
+                        loader.style.display='none'
+                    }
+                }
+
+        // Load and compare CSV after the page loads
+        window.onload = function() {
+            loadCSVAndCompare();
+        };
+    </script>
+</body>
+</html>

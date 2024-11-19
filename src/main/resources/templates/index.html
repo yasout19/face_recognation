@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Surveillance</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/style1.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container-fluid {
+            height: 100%;
+            padding: 0;
+        }
+        .row {
+            height: 100%;
+        }
+        .left-side {
+            background-image: url('image/02.jpg');
+            background-size:cover;    
+            background-size: 100% 100%;
+            background-position: center;
+
+        }
+        .right-side {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        .right-top-image {
+            position: absolute;
+            top: 9px;
+            right: 22px;
+            width: 95px;
+            height: 100px;
+            background-image: url('image/camera1.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+        }
+        .right-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+ 
+        
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 left-side"></div>
+            
+            <div class="col-md-6 right-side">
+                <div id="cam">
+                    <div id="mycamera"></div>
+                </div>
+                <div id="result"></div>
+                <div style="width:100%">
+                <button onclick="takeSnapshot()" id="take" class="btn btn-outline-dark" style="display: none; width:48%;margin-right:2px;margin-top:6px;margin-left:2px;height:42px" >Take Photo</button>
+                <button type="button" id="cancel"  class="btn btn-outline-danger" style="width: 48%;display:none;margin-top:6px;height:42px" onclick="refreshPage()">Cancel</button>
+            </div>
+                <button onclick="upload()" id="upload" style="display: none;width:35% ;margin-top:6px ; align-self:center;height:45px" class="btn btn-outline-warning btn-lg btn-block blinking-button" ><strong >CHECK NOW !!</strong> </button>
+                <div id="hide2">
+
+                <div class="right-top-image">
+                    
+                </div>
+                </div>
+
+                <div class="right-content">
+                    <div class="header">
+                       <div id="hide"> <h1 id="title" class='elegantshadow' style="margin-top: 140px;">Système&nbsp; Surveillance</h1></div>
+                    </div>
+                    <div id="hide1">
+                    <div class="form-container" style="margin-top: 103px;background-color:rgb(0, 0, 0)">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input type="file" class="form-control-file" name="image" id="image" accept="image/*" required>
+                            </div>
+                            <button type="button" id="blinking-button" class="btn btn-outline-warning btn-lg btn-block blinking-button"  style="width: 90%;" onclick="uploadImage()">CHECK NOW !!</button>
+                            <h6> <strong style="color: white;margin-right:25px;text-decoration:underline">Or</strong> <button type="button" class="btn btn-outline-info" style="margin-top:5px;width:180px;" onclick="configure()">Open Camera</button></h6>
+                        </form>
+                    </div>
+                </div>
+                   
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="overlay" id="banter-loader" style="display: none;">
+    <div class="newtons-cradle" >
+        <div class="newtons-cradle__dot"></div>
+        <div class="newtons-cradle__dot"></div>
+        <div class="newtons-cradle__dot"></div>
+        <div class="newtons-cradle__dot"></div>
+        </div>
+    </div>
+   
+    <script src="/js/test.js"></script>
+    <script src="/js/js1.js"></script>
+</body>
+</html>
+<script>
+    function refreshPage() {
+        location.reload(); // Reloads the current page
+      }
+    function hideElement() {
+        var element = document.getElementById("hide");
+        var element1 = document.getElementById("hide1");
+        var element2 = document.getElementById("hide2");
+        var element3 = document.getElementById("cancel");
+        
+        element.style.display = "none";
+        element1.style.display = "none";
+        element2.style.display = "none";
+        element3.style.display = "inline-block";
+      }
+    let capturedBlob
+    function configure(){
+        hideElement()
+        Webcam.set({
+            width:800,
+            height:480,
+            image_format:'jpeg',
+            jpeg_quality:100
+        });
+        Webcam.attach('#mycamera')
+        document.getElementById('take').style.display='inline-block';
+        
+    }
+    function takeSnapshot() {
+        Webcam.snap(function(data_uri) {
+            document.getElementById('result').innerHTML = '<img id="capturedImage" src="'+data_uri+'"/>';
+            capturedBlob = dataURItoBlob(data_uri);
+        });
+        document.getElementById('cam').style.display='none'
+        document.getElementById('upload').style.display='block'
+        Webcam.reset();
+    }
+
+    function dataURItoBlob(dataURI) {
+        var byteString = atob(dataURI.split(',')[1]);
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], {type: mimeString});
+    }
+    function upload() {
+        if (!capturedBlob) {
+            alert('Please take a snapshot first!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', capturedBlob, 'photo.jpeg');
+
+        // Show loading overlay
+        document.getElementById('banter-loader').style.display = 'flex';
+
+        fetch('/api/images/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('banter-loader').style.display = 'none';
+            window.location.href = '/result';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('banter-loader').style.display = 'none';
+            alert('An error occurred while uploading the image.');
+        });
+    }
+    function uploadImage() {
+        // Show loading overlay
+        document.getElementById('banter-loader').style.display = 'flex';
+
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('image', document.getElementById('image').files[0]);
+
+        // Send POST request to backend
+        fetch('/api/images/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            // Hide loading overlay
+            document.getElementById('banter-loader').style.display = 'none';
+            // Display response or handle it as needed
+             window.location.href = '/result';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Hide loading overlay
+            document.getElementById('banter-loader').style.display = 'none';
+            // Handle error or show appropriate message
+            alert('Une erreur est survenue lors de l\'envoi de l\'image.');
+        });
+    }
+</script>
+</body>
+</html>
