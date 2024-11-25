@@ -1,6 +1,6 @@
 # SystemDeSurveillance
 
-A **real-time face detection and feature extraction system** that leverages **VGGFace**, **Apache Spark**, **Kafka**, and a **Spring Boot application**. This project processes images, extracts facial features, and streams the results in a distributed system environment.
+A **real-time face detection and feature extraction system** that leverages **VGGFace**, **Apache Spark**, **Kafka**, and a **Spring Boot application**. This project processes images, extracts facial features, stores them in a database, and streams the results in a distributed system environment. It also provides functionality to compare detected faces with a dataset to find similarities.
 
 ---
 
